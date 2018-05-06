@@ -35,7 +35,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace qfs
 {
 	//TODO: follow UNIX standard as closely as possible
-	std::string get_directory(const std::string& path)
+	std::string dir(const std::string& path)
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
@@ -47,7 +47,7 @@ namespace qfs
 	}
 
 	//TODO: follow UNIX standard as closely as possible
-	std::string get_base(const std::string& path)
+	std::string base(const std::string& path)
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
@@ -58,7 +58,7 @@ namespace qfs
 #endif
 	}
 
-	std::string get_real_directory(const std::string& path)
+	std::string real_dir(const std::string& path)
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__)) //TODO: Handle stat errors
 
@@ -134,25 +134,25 @@ namespace qfs
 #endif
 	}
 
-	std::string get_real_file(const std::string& path)
+	std::string real_file(const std::string& path)
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
-		return get_real_directory(get_directory(path)) + get_base(path);
+		return real_dir(dir(path)) + base(path);
 
 #endif
 	}
 
-	std::string get_current_working_directory()
+	std::string current_dir()
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
-		return get_real_directory(".");
+		return real_dir(".");
 
 #endif
 	}
 
-	std::string get_symlink_chain_target(std::string path)
+	std::string link_chain_target(std::string path)
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
@@ -190,7 +190,7 @@ namespace qfs
 				}
 				else 
 				{
-					path = get_directory(path) + buffer.get();
+					path = dir(path) + buffer.get();
 				}
 				continue;
 			}
@@ -200,12 +200,12 @@ namespace qfs
 			}
 		}
 
-		return get_real_file(path);
+		return real_file(path);
 
 #endif
 	}
 
-	std::string get_real_path(const std::string& path, bool should_resolve_symlinks)
+	std::string real_path(const std::string& path, bool should_resolve_symlinks)
 	{
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 
@@ -222,7 +222,7 @@ namespace qfs
 				case ELOOP: break;
 
 				// Handle ENAMETOOLONG ourselves conditionally as PATH_MAX is ignored.
-				case ENAMETOOLONG: if (get_base(path).size() <= NAME_MAX) break;
+				case ENAMETOOLONG: if (base(path).size() <= NAME_MAX) break;
 				case ENOENT:
 				case ENOTDIR: throw std::runtime_error("The path specified is nonexistent"); //invalid argument
 
@@ -230,12 +230,12 @@ namespace qfs
 			}
 		}
 
-		return (S_ISDIR(sb.st_mode)? get_real_directory(path) : (should_resolve_symlinks? get_symlink_chain_target(path) : get_real_file(path)));
+		return (S_ISDIR(sb.st_mode)? real_dir(path) : (should_resolve_symlinks? link_chain_target(path) : real_file(path)));
 
 #endif
 	}
 
-	std::string get_executable_path()
+	std::string exe_path()
 	{
 #if defined (__APPLE__) && defined (__MACH__)
 
@@ -245,11 +245,11 @@ namespace qfs
 	std::unique_ptr<char[]> path(new char[path_size]);
 	_NSGetExecutablePath(path.get(), &path_size);
 
-	return get_real_path(path.get());
+	return real_path(path.get());
 
 #elif defined (__linux__)
 
-	return get_symlink_chain_target("/proc/self/exe");
+	return link_chain_target("/proc/self/exe");
 
 #endif
 	}

@@ -15,16 +15,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace qfs
 {
 	//TODO: follow unix standard
-	std::string get_directory(const std::string& path);
-	std::string get_base(const std::string& path);
+	std::string dir(const std::string& path);
+	std::string base(const std::string& path);
 
-	std::string get_real_directory(const std::string& start_dir);
-	std::string get_real_file(const std::string& path);
+	std::string real_dir(const std::string& start_dir);
+	std::string real_file(const std::string& path);
 
-	std::string get_current_working_directory();
+	std::string current_dir();
 
-	std::string get_symlink_chain_target(std::string path);
+	std::string link_chain_target(std::string path);
 
-	std::string get_real_path(const std::string& path, bool should_resolve_symlinks = true);
-	std::string get_executable_path();
+	std::string real_path(const std::string& path, bool should_resolve_symlinks = true);
+	std::string exe_path();
 }
