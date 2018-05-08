@@ -177,7 +177,7 @@ namespace qfs
 			{
 				if (sb.st_size <= 0) throw std::runtime_error("Unable to resolve symlink: invalid path length");
 		
-				std::unique_ptr<char[]> buffer(new char[sb.st_size + 1]);
+				auto buffer = std::make_unique<char[]>(sb.st_size + 1);
 
 				ssize_t amount = readlink(path.c_str(), buffer.get(), sb.st_size + 1);
 				if (!((amount > 0) && (amount <= sb.st_size))) throw std::runtime_error("Unable to resolve symlink: link modified during check"); //If > length, it was modified mid check
@@ -242,7 +242,7 @@ namespace qfs
 	uint32_t path_size = 0;
 	_NSGetExecutablePath(nullptr, &path_size);
 
-	std::unique_ptr<char[]> path(new char[path_size]);
+	auto path = std::make_unique<char[]>(path_size);
 	_NSGetExecutablePath(path.get(), &path_size);
 
 	return real_path(path.get());
